@@ -313,7 +313,7 @@
 
 \begin{document}
 
-\title{Understanding a Bug Introduction Change.\\ A Recursive Test Idea.}
+\title{Understanding a Bug Introduction Change:\\ The First Failing Commit and the Check Test.}
 
 
 % author names and affiliations
@@ -323,8 +323,8 @@
 \IEEEauthorblockA{LibreSoft/GSyC\\
 Universidad Rey Juan Carlos\\
 Madrid, Spain\\
-Email: gerope@libresoft.info}
-\and \IEEEauthorblockN{Jesus M. Gonz\'alez-Barahona}
+Email: gema.rodriguez@urjc.es}
+\and \IEEEauthorblockN{Jes\'us M. Gonz\'alez-Barahona}
 \IEEEauthorblockA{LibreSoft/GSyC\\
 Universidad Rey Juan Carlos\\
 Madrid, Spain\\
@@ -341,7 +341,8 @@ Email: grex@gsyc.urjc.es}}
 
 \begin{abstract}
 The assumption that ``a given bug was introduced by the lines of code that were modified to fix it'' seems at first glance very reasonable. In fact, many studies on bug fixing are built upon it. However, there is little empirical evidence supporting it, and a careful examination shows other possible sources for the introduction of bugs, such as an older modification, or a change in some API in a different part of the code.
-This paper presents an observational study designed to shed some more light in this area. For that, we studied independently the lines changed by bug fixes as a part of ``the previous commit'' (or commits) in two different projects. Using information from the code management, issue tracking, and code review systems, we analyzed if the code introduced by previous commits was the real bug introduction change, or on contrary it was correct at the time of introduction, meaning that there was any bug introduction change and was therefore the cause of the bug. Furthermore, we analyze the behavior of the implementation of a hypothetical test that is able to find the suspicious commit to be the bug introducing change. Our results show that at least 34\% of the tickets did not present any bug introduction change, as well as the assumption that bugs were introduced in the previous commit does not hold for a large fraction (between 28\% and 34\%) of the analyzed bugs.
+This paper presents an observational study designed to shed some more light in this area. For that, we studied independently the lines changed by bug fixes as a part of ``the previous commit'' (or commits) in two different projects. Using information from the code management, issue tracking, and code review systems, we analyzed if the code introduced by previous commits was the real bug introduction change, or on contrary it was correct at the time of introduction, meaning that there was any bug introduction change and was therefore the cause of the bug. Furthermore, we introduce a new concept, the \emph{First Failing Commit (FFC)} to help us explaining the complex elements that take place in the bug seeding analysis. Also, we evaluate this new concept by analyzing the behavior of the implementation of a hypothetical test that is able to find the FFC as the suspicious commit to be the bug introducing change. Our surprising results show that the assumption that bugs were introduced in the previous commit does not hold for a large fraction (around 70\%) and the previous commits identified as the FFC were (between 30\% and 35\%) of the analyzed commits in two different projects.
+%Our results show that at least 34\% of the tickets did not present any bug introduction change, as well as the assumption that bugs were introduced in the previous commit does not hold for a large fraction (between 70\%) of the analyzed bugs.
 
 \end{abstract}
 
@@ -376,7 +377,7 @@ But although the assumption can be found frequently in the research literature, 
 	\item RQ3: How frequently can we find automatically the bug introducing change of a bug fixing?
 \end{itemize}
 
-Our First contribution is an empirical study developed manually which addresses the challenges of finding the bug introducing change in two different projects. The method is focus on the analysis of the bug fix commit at line level, looking whether the bug introducing change is the last commit that inserted the fixed line. To understand if our findings are independent of the language, the two projects studied are Nova, a project of OpenStack written in python and ElasticSearch written in Java. The second contribution is the idea of a recursive test to find the bug introducing change. in order to mitigate the false positives that SZZ causes, we believe in the idea similar to that version control system bisection provides. Hence an issue is resolved and a test case is added in a revision, we might know that the bug have been injected before that revision. Thus, going back to previous revisions we might determine whether or not the bug is present. If it is indeed present, the test case fails and the bug must have been injected before (or by) that revision.
+Our First contribution is an empirical study developed manually which addresses the challenges of finding the bug introducing change in two different projects. The method is focus on the analysis of the bug fix commit at line level, looking whether the bug introducing change is the last commit that inserted the fixed line. To understand if our findings are independent of the language, the two projects studied are Nova, a project of OpenStack written in python and ElasticSearch written in Java. The second contribution is the \emph{First Failing Concept (FFC)} and the idea of a recursive test to find the bug introducing change. in order to mitigate the false positives that SZZ causes, we believe in the idea similar to that version control system bisection provides. Hence an issue is resolved and a test case is added in a revision, we might know that the bug have been injected before that revision. Thus, going back to previous revisions we might determine whether or not the bug is present. If it is indeed present, the test case fails and the bug must have been injected before (or by) that revision. The FFC might indicate whether the commit is the real BIC or it is the first time that the code fails after a change in other part affects the code we are testing.
 
 The primary findings reveal that, at least a large portion of the lines changed to fix a bug were not the cause of that bug, blaming to API changes as the first reason following to the changes in the operating system, packages or requirements. As expected, we found that when only one previous change touched the lines fixed by the fix commit, we can blame it as the caused the bug, whereas when more than one previous change touched the fixed lines in a bug fix, in the most cases only one of them is the cause of the bug and the others can not be blame as the cause.
 
@@ -416,9 +417,10 @@ At the end of this step we have two outcomes for each ticket analyzed:
 \section{Evaluation} 
 We have validated our methodology analyzing tickets from two different Open Source projects, ElasticSearch and Nova. Filtering was only necessary in the case of Nova, as Launchpad does not distinguish between bug reports and other issues. Two researchers were involved in this process, so that each ticket was analyzed by both researchers independently. For ElasticSearch, we relied on its strong policy of bug labeling. To identify the BIC of ticket, we manually analized tickets (that contain bugs, as a result from the filtering) from ElasticSearch and Nova.
 
-Since our aim is address some limitations of the SZZ approach by identifying the exact location of the BIC and understanding the reasons why a previous commit may not induce the fix. We compare the results from our manual analysis with the results from the SZZ approach to see how much results differ. Furthermore, to evaluate the test idea, we manually analyze the behavior of the test in each ticket. 
+Since our aim is address some limitations of the SZZ approach by identifying the exact location of the BIC and understanding the reasons why a previous commit may not induce the fix. We introduce a new concept, the \emph{First Failing Commit (FFC)} which is the suspicious commit to be the bug introducing commit and ideally it is located using a test case. This concept helps to fill the current nomenclature in those cases where the lines were correct at the time of introduction but at some point a change caused that these lines become buggy causing the bug. This FFC might be identify using the check test idea, where a test is passed to all the previous commit until find the first time that the test fails, we will refer to this commit as the FFC.
 
-Figure~\ref{fig:test} shows the check test idea. We are able to find the suspicious commit to be the bug inducing commit based on the idea of having an omnipotent view. Thus, the test is passed to all previous commits looking for the one that fails; if found, we will be consider it as a candidate for the bug inducing change.
+
+Figure~\ref{fig:test} shows the check test idea. We are able to find the FFC based on the idea of having an omnipotent view. Thus, the test is passed to all previous commits looking for the one that fails; if found, we will be consider it as a candidate for the bug inducing change.
 
 \begin{figure}[ht]
 \centering
@@ -428,21 +430,21 @@ Figure~\ref{fig:test} shows the check test idea. We are able to find the suspici
 \end{figure}
 
 
-\subsection{For each of these $pc$ is analyzed to determine whether it was the bug introduced change and the SZZ algorithm could found it }
+%\subsection{For each of these $pc$ is analyzed to determine whether it was the bug introduced change and the SZZ algorithm could found it }
+%
+%At the end of this step we have two outcomes for each commit analyzed based on the main assumption done by SZZ algorithm \cite{sliwerski2005changes}:
+%\begin{itemize}
+%	\item Founded by SZZ: The algorithm is able to locate the $pc$. It could be a true positive, $ pc == BIC $, or a false positive,$ pc \not= BIC $.
+%	\item No Founded by SZZ: The algorithm is not be able to locate the $pc$ but the BIC exists, this could be when the BFC only added new lines due to some of the $pc$ forgot added. Or maybe, the algorithm is not be able to locate the $pc$ because it belongs to other part of the code or because there is any BIC.
+%\end{itemize}
 
-At the end of this step we have two outcomes for each commit analyzed based on the main assumption done by SZZ algorithm \cite{sliwerski2005changes}:
+
+\subsection{For each of the tickets, could the hypothetical recursive test found the BIC as the FFC?}
+
+At the end of this step we have two main groups for each FFC identified:
 \begin{itemize}
-	\item Founded by SZZ: The algorithm is able to locate the $pc$. It could be a true positive, $ pc == BIC $, or a false positive,$ pc \not= BIC $.
-	\item No Founded by SZZ: The algorithm is not be able to locate the $pc$ but the BIC exists, this could be when the BFC only added new lines due to some of the $pc$ forgot added. Or maybe, the algorithm is not be able to locate the $pc$ because it belongs to other part of the code or because there is any BIC.
-\end{itemize}
-
-
-\subsection{For each of those tickets belongs to set \textit{``BIC''}, could the hypothetical recursive test found the BIC correctly?}
-
-At the end of this step we have two main groups for each bug analyzed:
-\begin{itemize}
-	\item Group 1 : The bug has been always there, then the test will always fail.
-	\item Group 2: The bug can be found using the test. Thus, we have two main reasons: (a) The test fails as we expected because the failure was due to a change in other part of the code that affects the code fixed or  the fixed line(s)/token(s) cannot be checked before because they didn't exists. (b) The test fails because a previous change (the immediately previous commit or an older commit) injected the bug.
+	\item Group 1: The bug has been always there the FFC is the first commit in the project, then the test will always fail.
+	\item Group 2: The FFC can be found using the test. Thus, we have two main reasons: (a) The test fails as we expected because the failure was due to a change in other part of the code that affects the code fixed or the fixed line(s) cannot be checked before because they didn't exists. (b) The FFC is the BIC, the test fails because a previous change (the previous commit or an older commit) injected the bug.
 \end{itemize}
 
 %For each ticket we analyzed whether set BIC that we manually founded correspond to the set BIC that the SZZ algorithm founded. We have three outcomes:
@@ -454,28 +456,32 @@ At the end of this step we have two main groups for each bug analyzed:
 
 \section{Results}
 \label{sec:results}
-%We have analyzed 60 random tickets from the two projects, determining if the ticket presents a BIC and at this case, identifying whether the $ipc$ is(are) the BIC(s). Thus, after finding the lines which fix the bug in the 55 tickets in Nova and 56 tickets in ElasticSearch (we discarded some because we were not sure about the bug fix commit), we classified the tickets in two different sets, SET \textit{``BIC''} and SET \textit{``No BIC''}. In addition, each commit also was classified into the SET of \textit{``FOUNDED''} and \textit{``NO FOUNDED''} by SZZ algorithm. Furthermore, from those classified into the SET \textit{``FOUNDED''} by SZZ, we determined how many of them were classified as \textit{``True possitives''} and \textit{``Flase Positives''} as Table~\ref{tableI} shows.
+We have analyzed 60 random tickets from the two projects, determining if the lines changed to fix a bug were the cause of the bug and at this case, identifying whether a previous commit(s) is the BIC or not. Thus, after finding the lines which fix the bug in the 60 tickets in Nova and ElasticSearch, we classified the tickets into two different sets, SET \textit{``BIC''} and SET \textit{``No BIC''}. In addition, each previous commit also was classified into the SET of \textit{``FFC''} and \textit{``NO FFC''}.
 
-%From the 55 tickets analyzed in Nova, 73\% was classified into BIC group and 27\% into NO BIC group. On the contrary, from the 56 in ElasticSearch the number of tickets classified into set BIC was lower, 68\%, whereas the set of NO BIC was a little bit higher, 32\%.
+%the tickets in two different sets, SET \textit{``BIC''} and SET \textit{``No BIC''}. In addition, each commit also was classified into the SET of \textit{``FOUNDED''} and \textit{``NO FOUNDED''} by SZZ algorithm. Furthermore, from those classified into the SET \textit{``FOUNDED''} by SZZ, we determined how many of them were classified as \textit{``True possitives''} and \textit{``Flase Positives''} as Table~\ref{tableI} shows.
 
-%The number of commits analyzed at line level was 121 in Nova and 129 in ElasticSearch, in the 90\% of the cases the SZZ algorithm was able to find them in both projects. But, from the 90\% of commits founded, only in 45\% in Nova and 48\% in ElasticSearch the SZZ algorithm blame the correct $ipc$ as the cause of the bug.
+From the 60 tickets analyzed in Nova, 72\% was classified into BIC group and 28\% into NO BIC group. The number of commits analyzed at line level was 141 and only the 30\% of the cases those commits were the FFC, finally in the 22\% of the cases the FFC was the BIC.
+
+On the contrary, from the 60 in ElasticSearch the number of tickets classified into set BIC was higher, 75\%, whereas the set of NO BIC was a little bit lower, 25\%. The number of commits analyzed at line level was 132 and only the 35\% of the cases those commits were the FFC, finally in the 29\% of the cases the FFC was the BIC.
+
+%But, from the 90\% of commits founded, only in 45\% in Nova and 48\% in ElasticSearch the SZZ algorithm blame the correct $ipc$ as the cause of the bug.
 
 %On the other hand, the number of commits analyzed at token level was 151 in both projects, between the 85-87\% of the cases the SZZ algorithm was able to find them. But, from the 85\% of commits founded, only in 48\% in Nova and 36\% in ElasticSearch the SZZ algorithm blame the correct $ipc$ as the cause of the bug. Some of the $ipc$ were classified into unknown set when we were no sure about whether it was a cause of the bug or not.
 
-%Additionally, in those cases where the ticket does not present any BIC, we are able to present a short classification of the main reasons:
-%\begin{itemize}
-%  \item Changes to APIs, such as the addition of an argument. 
-%  \item Updates done, such as changes in the operating system, packages or requirements.
-%\end{itemize}
+Additionally, in those cases where the ticket does not present any BIC, we are able to present a short classification of the main reasons:
+\begin{itemize}
+  \item Changes to APIs, such as the addition of an argument. 
+  \item Updates done, such as changes in the operating system, packages or requirements.
+\end{itemize}
 
-%In any case, our research shows evidence that assuming that the $ipc$ is where the cause of a bug can be found does not hold for a significant fraction of bugs. The most common reasons for the $ipc$ was not a BIC in the projects are:
-%
-%\begin{itemize}
-%  \item Variable renaming.
-%  \item Changes done by the BFC in a clean line.
-%  \item Refactoring of the code in some lines.
-%  \item Grammar errors, dragged from former commits.
-%\end{itemize} 
+In any case, our research shows evidence that assuming that the $pc$ is where the cause of a bug can be found does not hold for a significant fraction of bugs. The most common reasons for the $pc$ was not a BIC in the projects are:
+
+\begin{itemize}
+  \item Variable renaming.
+  \item Changes done by the BFC in a clean line.
+  \item Refactoring of the code in some lines.
+  \item Grammar errors, dragged from former commits.
+\end{itemize} 
 %
 %\begin{table}[!t]
 %\renewcommand{\arraystretch}{1.3}
@@ -502,7 +508,7 @@ At the end of this step we have two main groups for each bug analyzed:
 %\end{table}
 
 \section{Conclusion}
-The empirical experiment we have performed in Nova and ElasticSearch has shown that for a large fraction of the analyzed tickets, about 32\%, did not present any BIC. Whereas from those tickets that present a BIC, the implicit assumption that bugs were introduced in the previous commit does not hold at least in 50\% of them.
+The empirical experiment we have performed in Nova and ElasticSearch has shown that for a large fraction of the analyzed tickets, around 25\%, did not present any BIC. Whereas from those tickets that present a BIC, the implicit assumption that bugs were introduced in the previous commit does not hold at least in 70\% of them.
 
 Our study also shows that even when we are sure that some previous change introduced the bug in the line, in some cases the $pc$ is the bug introducing change. %In other cases, the $ipc$ is not the bug introduce change and the best method to prevent these cases is the token level. And finally in the rest of cases, we are unable to locate the bug introduce change because of the several changes suffer by the code.
 
