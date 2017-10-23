@@ -447,26 +447,14 @@ At the end of this step we have two main groups for each FFC identified:
 	\item Group 2: The FFC can be found using the test. Thus, we have two main reasons: (a) The test fails as we expected because the failure was due to a change in other part of the code that affects the code fixed or the fixed line(s) cannot be checked before because they didn't exists. (b) The FFC is the BIC, the test fails because a previous change (the previous commit or an older commit) injected the bug.
 \end{itemize}
 
-%For each ticket we analyzed whether set BIC that we manually founded correspond to the set BIC that the SZZ algorithm founded. We have three outcomes:
-%\begin{itemize}
-%	\item Set SZZ: When (all) the $ipc$ is(are) the BIC, and furthermore the set of BIC founded manually and using SZZ are equals.
-%	\item MIDDLE SZZ: Set SZZ: When a(some) $ipc$ is(are) a BIC and furthermore SZZ algorithm found it(them).
-%	\item NO SZZ: When (all) the $ipc$ is(are) not the BIC, and furthermore the intersection of set BIC founded manually and using SZZ is empty.
-%\end{itemize}
-
 \section{Results}
 \label{sec:results}
 We have analyzed 60 random tickets from the two projects, determining if the lines changed to fix a bug were the cause of the bug and at this case, identifying whether a previous commit(s) is the BIC or not. Thus, after finding the lines which fix the bug in the 60 tickets in Nova and ElasticSearch, we classified the tickets into two different sets, SET \textit{``BIC''} and SET \textit{``No BIC''}. In addition, each previous commit also was classified into the SET of \textit{``FFC''} and \textit{``NO FFC''}.
-
-%the tickets in two different sets, SET \textit{``BIC''} and SET \textit{``No BIC''}. In addition, each commit also was classified into the SET of \textit{``FOUNDED''} and \textit{``NO FOUNDED''} by SZZ algorithm. Furthermore, from those classified into the SET \textit{``FOUNDED''} by SZZ, we determined how many of them were classified as \textit{``True possitives''} and \textit{``Flase Positives''} as Table~\ref{tableI} shows.
 
 From the 60 tickets analyzed in Nova, 72\% was classified into BIC group and 28\% into NO BIC group. The number of commits analyzed at line level was 141 and only the 30\% of the cases those commits were the FFC, finally in the 22\% of the cases the FFC was the BIC.
 
 On the contrary, from the 60 in ElasticSearch the number of tickets classified into set BIC was higher, 75\%, whereas the set of NO BIC was a little bit lower, 25\%. The number of commits analyzed at line level was 132 and only the 35\% of the cases those commits were the FFC, finally in the 29\% of the cases the FFC was the BIC.
 
-%But, from the 90\% of commits founded, only in 45\% in Nova and 48\% in ElasticSearch the SZZ algorithm blame the correct $ipc$ as the cause of the bug.
-
-%On the other hand, the number of commits analyzed at token level was 151 in both projects, between the 85-87\% of the cases the SZZ algorithm was able to find them. But, from the 85\% of commits founded, only in 48\% in Nova and 36\% in ElasticSearch the SZZ algorithm blame the correct $ipc$ as the cause of the bug. Some of the $ipc$ were classified into unknown set when we were no sure about whether it was a cause of the bug or not.
 
 Additionally, in those cases where the ticket does not present any BIC, we are able to present a short classification of the main reasons:
 \begin{itemize}
@@ -474,7 +462,7 @@ Additionally, in those cases where the ticket does not present any BIC, we are a
   \item Updates done, such as changes in the operating system, packages or requirements.
 \end{itemize}
 
-In any case, our research shows evidence that assuming that the $pc$ is where the cause of a bug can be found does not hold for a significant fraction of bugs. The most common reasons for the $pc$ was not a BIC in the projects are:
+In any case, our research shows evidence that assuming that the $pc$ is where the cause of a bug can be found does not hold for a significant fraction of bugs. The most common reasons for the $pc$ was neither a FFC or a BIC in the projects are:
 
 \begin{itemize}
   \item Variable renaming.
