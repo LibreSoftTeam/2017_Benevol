@@ -424,8 +424,9 @@ We identify the commit that fixed the bug from the information of the bug fix co
 	
 \subsubsection{For each of those lines, identify what commit added or modified or deleted last these lines}
 
-Each line touched by the BFC has only one previous commit, we will refer to such commits as $pc$.
-This $pc$ could be the same or could be different in such lines. Thus, the result of finding the $pc$ of the bug is the $PC$ set, which could be a set of one or more $pc$. FIXME: este párrafo no queda nada claro. En este párrafo quería decir que cada BFC tiene una o mas lineas, cada una de esas lineas tiene un único pc, pero cada pc de cada línea en el BFC puede ser el mismo o puede ser distinto, por tanto como resultado tenemos un conjunto de pc's llamado PC SET.
+For each line touched by the BFC there is one previous commit, which we will refer to as $pc$.
+However, the $pc$ does not have to be the same commit for all lines affected.
+Thus, the result of finding the $pc$ of the bug is the $PC$ set, which could be a set of one or more $pc$. 
 
 \subsubsection{Each of these $pc$ (and its previous commits) is analyzed to determine whether it was the bug introduced change}
 
